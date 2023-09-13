@@ -1,17 +1,41 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+import App from "./App";
+
+import "./index.css";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+
+axios.interceptors.request.use(function (config) {
+  const token = localStorage.getItem("token");
+  config.headers["x-access-token"] = token;
+
+  return config;
+});
+
+axios.interceptors.response.use(
+  function (response) {
+    return response;
+  },
+  function (error) {
+    if (error.response.status === 401) {
+      localStorage.clear();
+      toast.success(
+        "You have been logged out. Login with your credentials to continue!"
+      );
+      window.location.href = "/";
+      window.location.reload();
+    }
+  }
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+  <BrowserRouter>
+    <ToastContainer />
+    <App />
+  </BrowserRouter>
+);
